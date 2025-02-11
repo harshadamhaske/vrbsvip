@@ -1,0 +1,53 @@
+{
+  "welcomeScreen": {
+    "title": "Initial Setup",
+    "audio": [
+      "Welcome to our application VRBSVIP....",
+      "Press anywhere on the screen to continue setting up initial configurations"
+    ],
+    "message": [
+      "Welcome !!",
+      "Press anywhere on the screen to continue setting up initial configurations"
+    ]
+  },
+
+  "languageSelectionScreen": {
+    "title": "Language Selection",
+    "audio": [
+      "This is First Step, Language Selection",
+      "Press screen once for English",
+      "मराठीसाठी स्क्रीनवर दोनदा दाबा",
+      "हिंदी के लिए स्क्रीनपर तीन बार दबाएं"
+    ],
+    "message": [
+      "Press screen once for English",
+      "मराठीसाठी स्क्रीनवर दोनदा दाबा",
+      "हिंदी के लिए स्क्रीनपर तीन बार दबाएं"
+    ]
+  },
+
+  "emergencyContactScreen": {
+    "title": "Emergency Contact Setup",
+    "audio": [
+      "This is Second Step, Emergency Contact Selection",
+      "Press anywhere on the screen to continue adding Emergency Contacts"
+    ],
+    "message": [
+      "Press anywhere on the screen to continue adding Emergency Contacts"
+    ]
+  },
+
+  "setupCompleteScreen": {
+    "title": "Setup Completion",
+    "audio": [
+      "Initial Setup is Complete",
+      "Now we can start assisting you",
+      "Press anywhere to begin"
+    ],
+    "message": [
+      "Initial Setup is Complete",
+      "Now we can start assisting you",
+      "Press anywhere to begin"
+    ]
+  }
+}
