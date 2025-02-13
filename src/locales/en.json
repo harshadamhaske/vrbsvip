@@ -49,5 +49,25 @@
       "Now we can start assisting you",
       "Press anywhere to begin"
     ]
+  }, 
+
+  "homeScreen": {
+    "title": "Home Screen",
+    "audio": [
+      "You are on the Home Screen",
+      "Press once for Object Recognition",
+      "Press twice for Text Recognition",
+      "Press three times for Navigation Assistance",
+      "Or use voice commands",
+      "To go back, press twice or say 'Back to Home Screen'"
+    ],
+    "message": [
+      "Press 1 for Object Recognition",
+      "Press 2 for Text Recognition",
+      "Press 3 for Navigation Assistance",
+      "You can also use voice commands",
+      "Say 'Back to Home Screen' to return"
+    ],
+    "backCommand": "Back to Home Screen"
   }
 }

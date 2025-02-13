@@ -1,34 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import { Camera, useCameraDevices } from 'react-native-vision-camera'; // Using vision-camera for the camera
-import MLKitOcr from "react-native-mlkit-ocr"; // ML Kit OCR
-import Tts from "react-native-tts"; // for text-to-speech
+import { View, Text, TouchableWithoutFeedback } from "react-native";
+import { Camera, useCameraDevices } from "react-native-vision-camera";
+import MLKitOcr from "react-native-mlkit-ocr";
+import Tts from "react-native-tts";
 import { useNavigation } from "@react-navigation/native";
 
 const TextRecognition = () => {
   const [recognizedText, setRecognizedText] = useState("");
   const [cameraReady, setCameraReady] = useState(false);
   const navigation = useNavigation();
-  
+
   const devices = useCameraDevices();
-  const device = devices.back; // Get the back camera
+  const device = devices.back;
 
   useEffect(() => {
-    // Initialize text-to-speech
     Tts.setDefaultLanguage("en-US");
-    Tts.setDefaultRate(0.5); // Set rate of speech
+    Tts.setDefaultRate(0.5);
   }, []);
 
   const handleTextRecognition = async (imageData) => {
     try {
-      // Perform OCR on the camera image using MLKit
-      const result = await MLKitOcr.recognize(imageData, {
-        lang: "en", // Language code for English
-      });
-
+      const result = await MLKitOcr.recognize(imageData, { lang: "en" });
       if (result.text) {
-        setRecognizedText(result.text); // Update the recognized text
-        Tts.speak(`Recognized text is: ${result.text}`); // Speak the recognized text
+        setRecognizedText(result.text);
+        Tts.speak(`Recognized text is: ${result.text}`);
       }
     } catch (error) {
       console.error("OCR Error: ", error);
@@ -41,75 +36,39 @@ const TextRecognition = () => {
 
   const onFrameProcessed = async (frame) => {
     if (cameraReady && frame) {
-      const imageData = frame.toDataURL(); // Convert frame to a Data URL for OCR
+      const imageData = frame.toDataURL();
       await handleTextRecognition(imageData);
     }
   };
 
   return (
     <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
-      <View style={styles.container}>
-        {/* Camera Section */}
-        {device != null && (
-          <View style={styles.cameraContainer}>
+      <View className="flex-1 justify-center items-center bg-white">
+        {device && (
+          <View className="flex-3 w-full justify-center items-center bg-black">
             <Camera
-              style={styles.camera}
+              className="w-full h-full"
               device={device}
               isActive={true}
               onInitialized={onCameraReady}
-              frameProcessorFps={5} // Limit FPS to improve performance
-              frameProcessor={onFrameProcessed} // Process frames for text recognition
+              frameProcessorFps={5}
+              frameProcessor={onFrameProcessed}
             />
           </View>
         )}
 
-        {/* Recognized Text Section */}
         {recognizedText ? (
-          <View style={styles.recognizedContainer}>
-            <Text style={styles.recognizedText}>{recognizedText}</Text>
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-xl font-bold text-black">{recognizedText}</Text>
           </View>
         ) : (
-          <Text style={styles.instructions}>Looking for text...</Text>
+          <Text className="text-lg text-gray-600 mt-2">Looking for text...</Text>
         )}
 
-        <Text style={styles.instructions}>Tap anywhere to go back</Text>
+        <Text className="text-lg text-gray-500 mt-4">Tap anywhere to go back</Text>
       </View>
     </TouchableWithoutFeedback>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cameraContainer: {
-    flex: 3,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "black",
-  },
-  camera: {
-    width: "100%",
-    height: "100%",
-  },
-  recognizedContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  recognizedText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "black",
-  },
-  instructions: {
-    fontSize: 18,
-    marginTop: 10,
-    color: "gray",
-  },
-});
 
 export default TextRecognition;

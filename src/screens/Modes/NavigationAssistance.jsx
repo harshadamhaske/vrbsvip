@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { Camera, useCameraDevices } from "react-native-vision-camera"; // ✅ Correct Camera
+import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { Camera, useCameraDevices } from "react-native-vision-camera";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-react-native";
-import * as cocoSsd from "@tensorflow-models/coco-ssd"; // ✅ Object Detection
-import Tts from "react-native-tts"; // ✅ Text to Speech
+import * as cocoSsd from "@tensorflow-models/coco-ssd";
+import Tts from "react-native-tts";
 
 const NavigationAssistance = () => {
   const cameraRef = useRef(null);
@@ -15,22 +15,19 @@ const NavigationAssistance = () => {
   const [hasPermission, setHasPermission] = useState(false);
 
   useEffect(() => {
-    // ✅ Ask for Camera Permission
     const requestPermission = async () => {
       const status = await Camera.requestCameraPermission();
       setHasPermission(status === "authorized");
     };
     requestPermission();
 
-    // ✅ Load TensorFlow Model
     const loadModel = async () => {
-      await tf.ready(); // Ensure TensorFlow is ready
-      const loadedModel = await cocoSsd.load(); // Load model
+      await tf.ready();
+      const loadedModel = await cocoSsd.load();
       setModel(loadedModel);
     };
     loadModel();
 
-    // ✅ Initialize TTS
     Tts.setDefaultLanguage("en-US");
     Tts.setDefaultRate(0.5);
   }, []);
@@ -39,10 +36,9 @@ const NavigationAssistance = () => {
     if (!cameraRef.current || !model) return;
 
     try {
-      const photo = await cameraRef.current.takePhoto(); // ✅ Take a snapshot
-      const imageTensor = tf.browser.fromPixels(photo); // ✅ Convert to Tensor
-
-      const predictions = await model.detect(imageTensor); // ✅ Object Detection
+      const photo = await cameraRef.current.takePhoto();
+      const imageTensor = tf.browser.fromPixels(photo);
+      const predictions = await model.detect(imageTensor);
       setRecognizedObjects(predictions);
 
       if (predictions.length > 0) {
@@ -58,30 +54,24 @@ const NavigationAssistance = () => {
   };
 
   if (!hasPermission) {
-    return <Text style={styles.permissionText}>Camera permission is required.</Text>;
+    return <Text className="text-lg text-red-600 text-center">Camera permission is required.</Text>;
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center items-center bg-white">
       {device ? (
-        <Camera
-          ref={cameraRef}
-          style={styles.camera}
-          device={device}
-          isActive={true}
-          photo={true}
-        />
+        <Camera ref={cameraRef} className="w-full h-[70%]" device={device} isActive={true} photo={true} />
       ) : (
-        <Text>Loading Camera...</Text>
+        <Text className="text-lg text-gray-600">Loading Camera...</Text>
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handleObjectRecognition}>
-        <Text style={styles.buttonText}>Detect Objects</Text>
+      <TouchableOpacity className="bg-blue-600 p-3 rounded-lg mt-5" onPress={handleObjectRecognition}>
+        <Text className="text-white text-lg">Detect Objects</Text>
       </TouchableOpacity>
 
-      <View style={styles.recognizedContainer}>
+      <View className="mt-5">
         {recognizedObjects.map((obj, index) => (
-          <Text key={index} style={styles.recognizedText}>
+          <Text key={index} className="text-lg text-black">
             {obj.class} (Confidence: {Math.round(obj.score * 100)}%)
           </Text>
         ))}
@@ -89,20 +79,5 @@ const NavigationAssistance = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  camera: { width: "100%", height: "70%" },
-  button: {
-    backgroundColor: "blue",
-    padding: 10,
-    marginTop: 20,
-    borderRadius: 5,
-  },
-  buttonText: { color: "white", fontSize: 18 },
-  recognizedContainer: { marginTop: 20 },
-  recognizedText: { fontSize: 16, color: "black" },
-  permissionText: { fontSize: 18, color: "red", textAlign: "center" },
-});
 
 export default NavigationAssistance;

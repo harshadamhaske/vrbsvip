@@ -8,7 +8,6 @@ import SetupCompletion from './setup-completion';
 import {useEffect} from 'react';
 import {loadLanguage} from '../../services/translationService';
 import {NavigationContainer} from '@react-navigation/native';
-import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import EmergencyContactAdding from './emergency-contact-adding';
 
 const Stack = createNativeStackNavigator();
@@ -36,9 +35,6 @@ const RootLayout = () => {
           component={WelcomePage}
           options={{
             title: t('welcomeScreen', {returnObjects: true}).title,
-            headerRight: () => (
-              <FontAwesome6 name="person" size={24} color="white" iconStyle='solid'/>
-            ),
           }}
         />
         <Stack.Screen
@@ -46,9 +42,6 @@ const RootLayout = () => {
           component={LanguageSelection}
           options={{
             title: t('languageSelectionScreen', {returnObjects: true}).title,
-            headerRight: () => (
-              <FontAwesome6 name="language" size={24} color="white" iconStyle='solid'/>
-            ),
           }}
         />
         <Stack.Screen
@@ -59,12 +52,12 @@ const RootLayout = () => {
           }}
         />
         <Stack.Screen
-        name="index"
-        component={EmergencyContactAdding}
-        options={{
-          title: t('emergencyContactScreen', {returnObjects: true}).title,
-        }}
-      />
+          name="index"
+          component={EmergencyContactAdding}
+          options={{
+            title: t('emergencyContactScreen', {returnObjects: true}).title,
+          }}
+        />
         <Stack.Screen
           name="setup-completion"
           component={SetupCompletion}

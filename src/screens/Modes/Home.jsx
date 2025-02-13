@@ -1,110 +1,77 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import initVoice from "../../services/voiceRecognitionService";
-import { setResults } from "../../reducers/voice";
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import Tts from 'react-native-tts';
+import Voice from '@react-native-voice/voice';
+import { useNavigation } from '@react-navigation/native';
 
-const HomeScreen = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const voiceResults = useSelector((state) => state.voice.results) || []; // Default to empty array
+import en from '../../locales/en.json';
+import hi from '../../locales/hi.json';
+import mr from '../../locales/mr.json';
+
+const selectedLanguage = 'hi';
+const Home = () => {
+  const navigation = useNavigation();
   const [tapCount, setTapCount] = useState(0);
-  const [lastTap, setLastTap] = useState(null);
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
 
-  // Function to handle tap navigation
-  const handleTap = (destination) => {
-    const now = Date.now();
-    if (lastTap && now - lastTap < 500) {
-      setTapCount((prev) => prev + 1);
-    } else {
-      setTapCount(1);
-    }
-    setLastTap(now);
+  const langData = selectedLanguage === 'en' ? en : selectedLanguage === 'hi' ? hi : mr;
 
-    if (destination === "ObjectRecognition" && tapCount === 1) {
-      navigation.navigate("ObjectRecognition");
-      setTapCount(0);
-    } else if (destination === "TextRecognition" && tapCount === 2) {
-      navigation.navigate("TextRecognition");
-      setTapCount(0);
-    } else if (destination === "NavigationAssistance" && tapCount === 3) {
-      navigation.navigate("NavigationAssistance");
-      setTapCount(0);
+  useEffect(() => {
+    if (isFirstVisit) {
+      Tts.speak(langData.homeScreen.audio.join(' '));
+      setIsFirstVisit(false);
     }
+
+    Voice.onSpeechResults = (e) => {
+      const command = e.value[0].toLowerCase();
+      if (command.includes(langData.homeScreen.message[0].toLowerCase())) {
+        navigation.navigate('ObjectRecognition');
+      } else if (command.includes(langData.homeScreen.message[1].toLowerCase())) {
+        navigation.navigate('TextRecognition');
+      } else if (command.includes(langData.homeScreen.message[2].toLowerCase())) {
+        navigation.navigate('NavigationAssistance');
+      } else if (command.includes(langData.homeScreen.backCommand.toLowerCase())) {
+        navigation.navigate('Home');
+      }
+    };
+
+    return () => Voice.destroy().then(Voice.removeAllListeners);
+  }, [isFirstVisit]);
+
+  const handleTap = () => {
+    setTapCount(tapCount + 1);
+    setTimeout(() => {
+      if (tapCount === 1) navigation.navigate('ObjectRecognition');
+      else if (tapCount === 2) navigation.navigate('TextRecognition');
+      else if (tapCount === 3) navigation.navigate('NavigationAssistance');
+      setTapCount(0);
+    }, 300);
   };
 
-  // Voice commands navigation
-  useEffect(() => {
-    initVoice.setCallback("onSpeechResults", (e) => {
-      const command = e.value[0]?.toLowerCase();
-      dispatch(setResults(e.value));
-
-      if (command.includes("object recognition")) {
-        navigation.navigate("ObjectRecognition");
-      } else if (command.includes("text recognition")) {
-        navigation.navigate("TextRecognition");
-      } else if (command.includes("navigation assistance")) {
-        navigation.navigate("NavigationAssistance");
-      }
-    });
-
-    return () => {
-      initVoice.destroy();
-    };
-  }, []);
-
   return (
-    <View style={styles.container}>
-      {/* View for Object Recognition */}
-      <TouchableWithoutFeedback onPress={() => handleTap("ObjectRecognition")}>
-        <View style={styles.section}>
-          <Text style={styles.title}>Tap Once for Object Recognition</Text>
-        </View>
-      </TouchableWithoutFeedback>
+    <TouchableOpacity
+      className="flex-1 justify-center items-center bg-gray-100"
+      onPress={handleTap}
+      onLongPress={() => Voice.start(selectedLanguage)}
+    >
+      {/* Background Image */}
+      {/* <Image source={require('../../assets/images/initialSetup/home.jpg')} className="w-full h-64 rounded-lg mb-5" /> */}
 
-      {/* View for Text Recognition */}
-      <TouchableWithoutFeedback onPress={() => handleTap("TextRecognition")}>
-        <View style={styles.section}>
-          <Text style={styles.title}>Tap Twice for Text Recognition</Text>
-        </View>
-      </TouchableWithoutFeedback>
+      {/* Title */}
+      <Text className="text-2xl font-bold mb-4">{langData.homeScreen.title}</Text>
 
-      {/* View for Navigation Assistance */}
-      <TouchableWithoutFeedback onPress={() => handleTap("NavigationAssistance")}>
-        <View style={styles.section}>
-          <Text style={styles.title}>Tap Thrice for Navigation Assistance</Text>
-        </View>
-      </TouchableWithoutFeedback>
+      {/* Modes */}
+      <View className="w-11/12 items-center">
+        {langData.homeScreen.message.map((msg, index) => (
+          <View key={index} className="bg-gray-300 p-4 my-2 w-full rounded-lg items-center">
+            <Text className="text-lg text-center">{msg}</Text>
+          </View>
+        ))}
+      </View>
 
-      {/* Display detected voice command */}
-      <Text style={styles.results}>Voice Command: {voiceResults.join(", ")}</Text>
-    </View>
+      <Text className="text-lg text-gray-600 mt-4">Long press to use voice commands</Text>
+    </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-  },
-  section: {
-    width: "80%",
-    padding: 20,
-    marginVertical: 10,
-    backgroundColor: "#ddd",
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  results: {
-    marginTop: 20,
-    fontSize: 16,
-    color: "blue",
-  },
-});
-
-export default HomeScreen;
+export default Home;

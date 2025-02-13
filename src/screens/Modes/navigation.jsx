@@ -29,7 +29,7 @@ const Navigation = () => {
             title: t('homeScreen', { returnObjects: true }).title,
           }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="ObjectRecognition"
           component={ObjectRecognition}
           options={{
@@ -49,7 +49,7 @@ const Navigation = () => {
           options={{
             title: t('navigationAssistanceScreen', { returnObjects: true }).title,
           }}
-        />
+        /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );

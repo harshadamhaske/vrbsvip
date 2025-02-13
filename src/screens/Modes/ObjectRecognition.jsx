@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { View, Text, TouchableWithoutFeedback } from "react-native";
 import { Camera, useCameraDevices } from "react-native-vision-camera"; // Updated Camera import
 import Tts from "react-native-tts"; // for text-to-speech
 import * as tf from "@tensorflow/tfjs"; // TensorFlow
@@ -27,16 +27,13 @@ const ObjectRecognition = ({ navigation }) => {
   }, []);
 
   const handleObjectRecognition = async (imageData) => {
-    // Load Coco SSD model for object detection
     const model = await cocoSsd.load();
-
-    // Detect objects in the camera frame
     const predictions = await model.detect(imageData);
 
     if (predictions.length > 0) {
-      const object = predictions[0].class; // Get the first detected object
+      const object = predictions[0].class;
       setRecognizedObject(object);
-      Tts.speak(`Recognized object is ${object}`); // Speak the recognized object
+      Tts.speak(`Recognized object is ${object}`);
     }
   };
 
@@ -46,77 +43,42 @@ const ObjectRecognition = ({ navigation }) => {
 
   const onFrameProcessed = async (frame) => {
     if (cameraReady && frame) {
-      // Process the camera frame for object recognition
       const imageTensor = tf.browser.fromPixels(frame);
       await handleObjectRecognition(imageTensor);
-      imageTensor.dispose(); // Clean up memory
+      imageTensor.dispose();
     }
   };
 
-  if (device == null) return <Text>Loading camera...</Text>;
+  if (device == null) return <Text className="text-lg text-gray-600">Loading camera...</Text>;
 
   return (
     <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
-      <View style={styles.container}>
+      <View className="flex-1 justify-center items-center bg-white">
         {/* Camera Section */}
-        <View style={styles.cameraContainer}>
+        <View className="flex-3 w-full justify-center items-center bg-black">
           <Camera
-            style={styles.camera}
+            className="w-full h-full"
             device={device}
             isActive={true}
             onReady={onCameraReady}
-            onFrameProcessor={onFrameProcessed} // Updated to use frame processor
-            frameProcessorFps={5} // Limit FPS to improve performance
+            onFrameProcessor={onFrameProcessed}
+            frameProcessorFps={5}
           />
         </View>
 
         {/* Recognized Object Section */}
         {recognizedObject ? (
-          <View style={styles.recognizedContainer}>
-            <Text style={styles.recognizedText}>{recognizedObject}</Text>
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-xl font-bold text-black">{recognizedObject}</Text>
           </View>
         ) : (
-          <Text style={styles.instructions}>Looking for objects...</Text>
+          <Text className="text-lg text-gray-600 mt-2">Looking for objects...</Text>
         )}
 
-        <Text style={styles.instructions}>Tap anywhere to go back</Text>
+        <Text className="text-lg text-gray-500 mt-4">Tap anywhere to go back</Text>
       </View>
     </TouchableWithoutFeedback>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cameraContainer: {
-    flex: 3,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "black",
-  },
-  camera: {
-    width: "100%",
-    height: "100%",
-  },
-  recognizedContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  recognizedText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "black",
-  },
-  instructions: {
-    fontSize: 18,
-    marginTop: 10,
-    color: "gray",
-  },
-});
 
 export default ObjectRecognition;
